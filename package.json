@@ -1,0 +1,31 @@
+{
+    "name": "spacial-ml",
+    "version": "1.0.0",
+    "description": "Machine learning as a spacial computing app",
+    "main": "src/viewer.js",
+    "directories": {
+        "example": "examples",
+        "test": "test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/w3reality/spacial-ml.git"
+    },
+    "keywords": [
+        "spacial computing",
+        "ml",
+        "vr"
+    ],
+    "author": "j-devel",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/w3reality/spacial-ml/issues"
+    },
+    "homepage": "https://github.com/w3reality/spacial-ml",
+    "dependencies": {},
+    "devDependencies": {
+        "three": "^0.104.0",
+        "tensorspace": "^0.6.1",
+        "threelet": "^0.9.16"
+    }
+}

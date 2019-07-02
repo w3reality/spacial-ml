@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>spacial-ml</title>
+</head>
+<body>
+    <canvas id="viewer" style="width: 100%; height: 100%;"></canvas>
+    <div>
+        If not in VR mode, try - [left-mouse-drag: canvas stroke] [right-mouse-drag: cam translate] [mouse-wheel: cam translate fw/bw]
+    </div>
+
+    <script src="../deps/stats.min.js"></script>
+    <script src="../deps/three.min.js"></script>
+    <script src="../deps/OrbitControls.js"></script>
+    <script src="../deps/WebVR.js"></script>
+    <script src="../deps/Sky.js"></script>
+    <script src="../deps/threelet.min.js"></script>
+    <script src="../deps/signature_pad.min.js"></script>
+
+    <script src="../deps/tween.min.js"></script>
+    <script src="../deps/tf.min.js"></script>
+    <script src="../deps/TrackballControls.js"></script>
+    <script src="../deps/tensorspace.min.js"></script>
+
+    <script type="module">
+    import Viewer from '../../src/viewer.js';
+
+    const viewer = new Viewer({
+        canvas: document.getElementById("viewer"),
+        optAxes: false,
+    });
+    if (! Viewer.isVrSupported()) { viewer.camera.position.z = 2; }
+
+    viewer.updateLoop(30);
+    // viewer.updateLoop(3); // debug
+    </script>
+</body>
+</html>
