@@ -3,8 +3,13 @@ spacial-ml
 
 Machine learning as a spacial computing app.
 
-Apps are designed so that they work the best in VR (WebVR using an HMD and controllers).
-But they are also usable in normal browsers using the traditional mouse interface.
+We have designed the app's UI with spacial computing in mind.
+So they should work the best in VR (i.e. via WebVR using an HMD and controllers).
+
+However, the apps are still usable as well in web browsers with the traditional mouse interface.
+
+Credits: We have used the `TensorSpace <https://github.com/tensorspace-team/tensorspace>`__ library that enables us to elegantly design, build, and visualize
+`TensorFlow.js <https://github.com/tensorflow/tfjs>`__ based machine learning models.
 
 **Demos**
 
