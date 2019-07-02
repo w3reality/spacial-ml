@@ -151,7 +151,7 @@ class TspAdapter {
         return mc;
     }
 
-    // optinal utils for Aframe
+    // optional utils for Aframe
     createAframeModelComponent() { return new __AframeModelComponent(); }
     createAframeColliderComponent() { return new __AframeColliderComponent(this); }
     _getAframeModelElement() {
