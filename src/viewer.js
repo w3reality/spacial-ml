@@ -66,13 +66,14 @@ class Viewer extends Threelet {
         };
 
         if (1) {
-            if (Threelet.isVrSupported()) {
+            if (Threelet.isVrSupported()) { // Oculus Go, desktop-firefox
                 // KLUDGE - when in desktop mode, Oculus browser triggers
                 //   both mouse/touch events at a time.
                 //   also, mouse-drag events seems not being fired...
-                //   So, enabling only touch events here.
-                this.setupTouchInterface(inputCallbacks);
-            } else {
+                //   So, enabling only pointer events here
+                //   (touch events NG for desktop-firefox).
+                this.setupPointerInterface(inputCallbacks);
+            } else { // desktop-chrome, desktop-safari
                 this.setupMouseInterface(inputCallbacks);
                 this.setupTouchInterface(inputCallbacks);
             }
@@ -178,7 +179,7 @@ class Viewer extends Threelet {
         this.mlObject = null;
         this.ml.init(obj => {
             this.mlObject = obj;
-            obj.position.set(0, 1, Threelet.isVrSupported() ? -1.5 : 1);
+            Threelet.hasVrDisplay(tf => obj.position.set(0, 1, tf ? -1.5 : 1));
 
             const group = this.getInteractiveGroup();
             group.add(obj);
@@ -331,11 +332,7 @@ class Viewer extends Threelet {
     }
     static createSelector(planeCanvas) {
         const selector = new THREE.Group();
-        if (Threelet.isVrSupported()) {
-            selector.position.set(0, 1, -3.5);
-        } else {
-            selector.position.set(0, 1, -0.5);
-        }
+        Threelet.hasVrDisplay(tf => selector.position.set(0, 1, tf ? -3.5 : -0.5));
 
         const plane = Threelet.Utils.createCanvasPlane(planeCanvas, 4, 2, 8, 8);
         if (0) { // control tex opacity

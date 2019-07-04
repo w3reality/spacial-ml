@@ -30,7 +30,6 @@
         canvas: document.getElementById("viewer"),
         optAxes: false,
     });
-    if (! Viewer.isVrSupported()) { viewer.camera.position.z = 2; }
 
     viewer.updateLoop(30);
     // viewer.updateLoop(3); // debug

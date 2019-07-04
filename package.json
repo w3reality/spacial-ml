@@ -26,6 +26,6 @@
     "devDependencies": {
         "three": "^0.104.0",
         "tensorspace": "^0.6.1",
-        "threelet": "^0.9.16"
+        "threelet": "^0.9.17"
     }
 }
