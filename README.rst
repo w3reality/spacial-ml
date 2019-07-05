@@ -13,6 +13,8 @@ Credits: We have used the `TensorSpace <https://github.com/tensorspace-team/tens
 
 - MNIST with LeNet [ `live <https://w3reality.github.io/spacial-ml/examples/lenet/index.html>`__ | `source <https://github.com/w3reality/spacial-ml/tree/master/examples/lenet/index.html>`__ | `video (UI) <https://w3reality.github.io/spacial-ml/examples/media/ui.mp4>`__ | `video (predictions) <https://w3reality.github.io/spacial-ml/examples/media/predict.mp4>`__ ]
 
+- MNIST with LeNet (A-Frame version) [ `live <https://w3reality.github.io/spacial-ml/examples/lenet-aframe/index.html>`__ | `source <https://github.com/w3reality/spacial-ml/tree/master/examples/lenet-aframe/index.html>`__ ]
+
 **Screen shots**
 
 .. image:: https://w3reality.github.io/spacial-ml/examples/media/desktop.jpg
