@@ -1,3 +1,5 @@
+// tsp-adapter.js - https://github.com/w3reality/spacial-ml
+// An adapter for TensorSpace models to be used in WebVR (MIT License)
 
 class __AframeModelComponent {
     constructor() {

@@ -4,7 +4,6 @@ class ML {
     constructor(modelUrl) {
         // build LeNet following
         // https://github.com/tensorspace-team/tensorspace/blob/master/examples/lenet/lenet.html
-
         const model = new TSP.models.Sequential(document.createElement('div'));
         model.add( new TSP.layers.GreyscaleInput({ shape: [28, 28, 1] }) );
         model.add( new TSP.layers.Padding2d({ padding: [2, 2] }) );

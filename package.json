@@ -24,8 +24,9 @@
     "homepage": "https://github.com/w3reality/spacial-ml",
     "dependencies": {},
     "devDependencies": {
-        "three": "^0.104.0",
+        "babel-preset-env": "^1.7.0",
         "tensorspace": "^0.6.1",
+        "three": "^0.104.0",
         "threelet": "^0.9.17"
     }
 }
