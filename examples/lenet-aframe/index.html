@@ -5,19 +5,19 @@
     <title>lenet-aframe</title>
 
     <!-- <script src="https://aframe.io/releases/0.9.1/aframe.min.js"></script> -->
-    <script src="../deps/aframe/aframe.min.js"></script>
+    <!-- <script src="../deps/aframe/aframe.min.js"></script> -->
     <!-- ==== prod/dev ==== -->
-    <!-- <script src="../deps/aframe/aframe-v0.9.1-no_cdn_fonts.min.js"></script> -->
+    <script src="../deps/aframe/aframe-v0.9.1-no_cdn_fonts.min.js"></script>
+
+    <!-- fps controller hack; desktop DEV ONLY; ***WebVR mode not supported*** -->
+    <!-- <script src="../deps/stats.min.js"></script>
+    <script src="../deps/aframe/aframe-loop-component.js"></script> -->
 
     <script src="../deps/aframe/aframe-environment-component.min.js"></script>
 
     <script src="../deps/aframe/super-hands.min.js"></script>
     <!-- for enabling event-set; v5.0.0 -->
     <script src="../deps/aframe/aframe-event-set-component.min.js"></script>
-
-    <!-- fps controller hack; desktop DEV ONLY; ***WebVR mode not supported*** -->
-    <!-- <script src="../deps/stats.min.js"></script>
-    <script src="../deps/aframe/aframe-loop-component.js"></script> -->
 
     <!-- tsp stuff -->
     <script src="../deps/tween.min.js"></script>
@@ -60,26 +60,19 @@
     AFRAME.registerComponent('base-collider', {
         dependencies: ['raycaster'],
         init: function () {
-            let posLast = null;
-            this.el.addEventListener('raycaster-intersection', evt => {
-                // console.log('@@ raycaster-intersection - evt:', evt);
-                const isects = evt.detail.intersections.slice();
-                // console.log('@@ base isects', isects);
-                const el = isects[0].object.el;
-                // console.log('@@ isects[0]:', el.id);
-                if (el.id === 'base') {
-                    // console.log('@@ el.object3D.position:', el.object3D.position);
-                    posLast = el.object3D.position;
-                    if (adapter.modelContext) {
-                        adapter.modelContext.visible = false;
-                    }
-                }
+            this.el.addEventListener('grab-start', evt => {
+                // console.log('@@ base grab-start', this.el.object3D);
+                const mc = adapter.modelContext;
+                if (mc) mc.visible = false;
             });
-            this.el.addEventListener('raycaster-intersection-cleared', evt => {
-                // console.log('@@ raycaster-intersection-cleared - evt:', evt);
-                if (adapter.modelContext && posLast) {
-                    adapter.modelContext.position.set(posLast.x, posLast.y+0.75, posLast.z);
-                    adapter.modelContext.visible = true;
+            this.el.addEventListener('grab-end', evt => {
+                const obj = this.el.object3D;
+                // console.log('@@ base grab-end', obj);
+                const mc = adapter.modelContext;
+                if (mc) {
+                    const { x, y, z } = obj.position;
+                    mc.position.set(x, y+0.75, z);
+                    mc.visible = true;
                 }
             });
         },
@@ -109,11 +102,11 @@
             yavapai, goldmine, threetowers, poison, arches, tron, japan,
             dream, volcano, starry, osiris
         -->
-        <!-- <a-entity environment="preset: threetowers"></a-entity> -->
-        <a-entity environment="preset: checkerboard; ground: flat; dressing: none; grid: 1x1;"></a-entity>
+        <a-entity environment="preset: contact"></a-entity>
+        <!-- <a-entity environment="preset: checkerboard; ground: flat; dressing: none; grid: 1x1;"></a-entity> -->
 
         <!-- control desktop mode -->
-        <a-entity tsp-collider base-collider
+        <a-entity tsp-collider
             wasd-controls position="0 1.7 0"
             capture-mouse
             raycaster="objects: .tspModel, .superCube;" cursor="rayOrigin: mouse;"
@@ -148,7 +141,7 @@
         </a-entity>
 
         <a-assets>
-            <a-mixin id="pointer" laser-controls tsp-collider base-collider
+            <a-mixin id="pointer" laser-controls tsp-collider
                 raycaster="showLine: true; objects: .tspModel, .superCube;"
                 super-hands="colliderEvent: raycaster-intersection;
                     colliderEventProperty: els;
@@ -180,11 +173,12 @@
         </a-assets>
 
         <a-entity position="0 1 -3" >
-            <a-entity id="base" geometry="primitive: box; width: 4.0; height: 0.05; depth: 1.0"
-                grabbable hoverable
-                event-set__hoveron="_event: hover-start; material.color: pink"
-                event-set__hoveroff="_event: hover-end; material.color: gray"
-                class="superCube" position="0 -0.75 0" material="color: gray"></a-entity>
+            <a-entity base-collider geometry="primitive: box; width: 4.0; height: 0.05; depth: 1.0"
+                class="superCube" position="0 -0.75 0" material="color: gray"
+                grabbable
+                event-set__grabon="_event: grab-start; material.color: pink"
+                event-set__graboff="_event: grab-end; material.color: gray"
+                ></a-entity>
             <a-entity tsp-model="axes: false;" class="tspModel"
                 rotation="0 0 0" position="0 0 0" scale="1 1 1"></a-entity>
         </a-entity>
