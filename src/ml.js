@@ -1,29 +1,7 @@
 import TspAdapter from './tsp-adapter.js';
 
 class ML {
-    constructor(modelUrl) {
-        // build LeNet following
-        // https://github.com/tensorspace-team/tensorspace/blob/master/examples/lenet/lenet.html
-        const model = new TSP.models.Sequential(document.createElement('div'));
-        model.add( new TSP.layers.GreyscaleInput({ shape: [28, 28, 1] }) );
-        model.add( new TSP.layers.Padding2d({ padding: [2, 2] }) );
-        model.add( new TSP.layers.Conv2d({ kernelSize: 5, filters: 6, strides: 1 }) );
-        model.add( new TSP.layers.Pooling2d({ poolSize: [2, 2], strides: [2, 2] }) );
-        model.add( new TSP.layers.Conv2d({ kernelSize: 5, filters: 16, strides: 1 }) );
-        model.add( new TSP.layers.Pooling2d({ poolSize: [2, 2], strides: [2, 2] }) );
-        model.add( new TSP.layers.Dense({ units: 120 }) );
-        model.add( new TSP.layers.Dense({ units: 84 }) );
-        model.add( new TSP.layers.Output1d({ units: 10, outputs: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"] }));
-        console.log('@@ model:', model);
-
-        model.load({
-            type: "tfjs",
-            url: modelUrl,
-            onComplete: () => { // to be called on init() !!!!
-                console.log("@@ onComplete(): hi, on init()");
-            },
-        });
-
+    constructor(model) {
         this._adapter = new TspAdapter();
         this._model = model;
         this._obj = null; // THREE object representing the tsp model
@@ -36,8 +14,8 @@ class ML {
             if (cb) cb(obj);
         });
     }
-    getModelInfo() {
-        return 'LeNet - mnist.json';
+    getModelUrl() {
+        return this._model.loader ? this._model.loader.config.url : '-';
     }
     clear() {
         this._model.clear();

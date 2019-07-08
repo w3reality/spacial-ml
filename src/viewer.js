@@ -28,8 +28,8 @@ class Viewer extends Threelet {
 
         const inputCallbacks = {
             onClick: (mx, my) => {
-                if (this.mlObject) {
-                    const isec = this.raycastFromMouse(mx, my, [this.mlObject,], true);
+                if (this.mlObject3D) {
+                    const isec = this.raycastFromMouse(mx, my, [this.mlObject3D,], true);
                     const isects = isec ? [isec,] : [];
                     if (isects.length > 0) {
                         this.ml.onClick(isects);
@@ -84,8 +84,8 @@ class Viewer extends Threelet {
 
         this._vrPressPlaneStart = [-1, -1]; // faceIndex per controller i
         this.on('vr-trigger-press-start', (i) => {
-            if (this.mlObject) {
-                const isects = this.raycastFromController(i, [this.mlObject,], true);
+            if (this.mlObject3D) {
+                const isects = this.raycastFromController(i, [this.mlObject3D,], true);
                 if (isects.length > 0) {
                     this.ml.onClick(isects);
                     return;
@@ -125,7 +125,7 @@ class Viewer extends Threelet {
 
         this.planeCtx = _planeCanvas.getContext('2d');
         this.update = (t, dt) => {
-            if (this.mlObject) {
+            if (this.mlObject3D) {
                 // update model's topology
                 this.ml.update();
 
@@ -141,7 +141,7 @@ class Viewer extends Threelet {
                     if (pad && pad.touched) {
                         const f1 = pad.axes0 - pad.axes1;
                         const f2 = pad.axes0 + pad.axes1;
-                        const pos = this.mlObject.position;
+                        const pos = this.mlObject3D.position;
                         if (f1 > 0 && f2 > 0 && pos.x < 4) {
                             pos.x += 0.1;
                         } else if (f1 > 0 && f2 < 0 && pos.y < 4) {
@@ -174,29 +174,41 @@ class Viewer extends Threelet {
             }
         };
 
-        // set up ML object
-        this.ml = new ML('./data/mnist.json');
-        this.mlObject = null;
-        this.ml.init(obj => {
-            this.mlObject = obj;
-            Threelet.hasVrDisplay(tf => obj.position.set(0, 1, tf ? -1.5 : 1));
-
-            const group = this.getInteractiveGroup();
-            group.add(obj);
-            this.scene.add(group);
-            // this.ml._predictDebug('./data/5.json');
-        });
-
         // instruction stuff
-        this.drawInfo([
-            `model: ${this.ml.getModelInfo()}`, ``, ``, ``, ``,
-        ]);
         Threelet.Utils.createCanvasFromImage('./control.png', can => {
             // console.log('@@ can:', can);
             // document.body.appendChild(can); // debug
             this.illustrationCanvas = can;
         });
+
+        this.scene.add(this.getInteractiveGroup());
+        this.ml = null;
+        this.mlObject3D = null;
+
     } // end onCreate()
+
+    loadML(name, model) {
+        this.ml = new ML(model);
+        this.drawInfo([
+            `model: ${name} - ${this.ml.getModelUrl()}`, ``, ``, ``, ``,
+        ]);
+        this.ml.init(obj => {
+            const group = this.getInteractiveGroup();
+
+            if (this.mlObject3D) {
+                const objLast = this.mlObject3D;
+                group.remove(objLast);
+                Threelet.freeChildObjects(objLast, objLast.children);
+                // console.log('@@ objLast:', objLast);
+            }
+            group.add(obj);
+            this.mlObject3D = obj;
+            console.log('@@ group:', group.children);
+
+            Threelet.hasVrDisplay(tf => obj.position.set(0, 1, tf ? -1.5 : 1));
+            // this.ml._predictDebug('./data/5.json'); // debug
+        });
+    }
 
     invokeSigPadCall(method, px, py) {
         try {
@@ -258,14 +270,14 @@ class Viewer extends Threelet {
                 Viewer.clearPaintArea(this.planeCtx);
                 this.updateIllustration(false);
 
-                if (this.mlObject) {
-                    this.mlObject.visible = false;
+                if (this.mlObject3D) {
+                    this.mlObject3D.visible = false;
                     this.ml.clear();
                 }
             } else if (what.endsWith('predict')) {
-                if (! this.mlObject) return;
+                if (! this.mlObject3D) return;
 
-                this.mlObject.visible = true;
+                this.mlObject3D.visible = true;
                 this.updateIllustration(true);
 
                 const ctx = this.sigData.canvas.getContext('2d');
