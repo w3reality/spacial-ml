@@ -174,12 +174,13 @@ class Viewer extends Threelet {
             }
         };
 
-        // instruction stuff
-        Threelet.Utils.createCanvasFromImage('./control.png', can => {
-            // console.log('@@ can:', can);
-            // document.body.appendChild(can); // debug
-            this.illustrationCanvas = can;
-        });
+        if (params.instruction) {
+            Threelet.Utils.createCanvasFromImage('./control.png', can => {
+                // console.log('@@ can:', can);
+                // document.body.appendChild(can); // debug
+                this.illustrationCanvas = can;
+            });
+        }
 
         this.scene.add(this.getInteractiveGroup());
         this.ml = null;
@@ -187,27 +188,38 @@ class Viewer extends Threelet {
 
     } // end onCreate()
 
-    loadML(name, model) {
+    async loadML(name, model, debug=false) {
         this.ml = new ML(model);
         this.drawInfo([
             `model: ${name} - ${this.ml.getModelUrl()}`, ``, ``, ``, ``,
         ]);
-        this.ml.init(obj => {
-            const group = this.getInteractiveGroup();
 
-            if (this.mlObject3D) {
-                const objLast = this.mlObject3D;
-                group.remove(objLast);
-                Threelet.freeChildObjects(objLast, objLast.children);
-                // console.log('@@ objLast:', objLast);
+        // this.ml.init(obj => {
+        const obj = await this.ml.init();
+        const group = this.getInteractiveGroup();
+
+        if (this.mlObject3D) {
+            const objLast = this.mlObject3D;
+            group.remove(objLast);
+            Threelet.freeChildObjects(objLast, objLast.children);
+            // console.log('@@ objLast:', objLast);
+        }
+        group.add(obj);
+        this.mlObject3D = obj;
+        console.log('@@ group:', group.children);
+
+        Threelet.hasVrDisplay(tf => obj.position.set(0, 1, tf ? -1.5 : 1));
+
+        if (debug) {
+            obj.visible = true;
+            if (name === 'lenet') {
+                this.ml._predictDebug('../data/lenet/5.json');
+            } else if (name === 'acgan') {
+                this.ml.predict([tf.randomNormal([1, 100]).dataSync(), [0]]);
+            } else {
+                console.log('@@ woops');
             }
-            group.add(obj);
-            this.mlObject3D = obj;
-            console.log('@@ group:', group.children);
-
-            Threelet.hasVrDisplay(tf => obj.position.set(0, 1, tf ? -1.5 : 1));
-            // this.ml._predictDebug('./data/5.json'); // debug
-        });
+        }
     }
 
     invokeSigPadCall(method, px, py) {

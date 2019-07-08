@@ -48,7 +48,7 @@
 
     model.load({
         type: "tfjs",
-        url: `../lenet/data/mnist.json`,
+        url: `../data/lenet/mnist.json`,
         onComplete: () => { // to be called on init() !!!!
             console.log("@@ onComplete(): hi, on init()");
         },
@@ -81,7 +81,7 @@
     model.init(async () => {
         adapter.setModel(model);
         if (1) { // prediction part
-            const inputUrl = `../lenet/data/5.json`;
+            const inputUrl = `../data/lenet/5.json`;
             try {
                 const resp = await fetch(inputUrl);
                 const json = await resp.json();
