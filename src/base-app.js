@@ -1,6 +1,7 @@
 import ML from './ml.js';
 
-class Viewer extends Threelet {
+class BaseApp extends Threelet {
+    // override
     onCreate(params) {
         const controls = this.setup('mod-controls', THREE.OrbitControls);
         controls.enableRotate = false;
@@ -10,11 +11,12 @@ class Viewer extends Threelet {
         this.setup('mod-webvr', window.WEBVR);
         this.setup('mod-sky', THREE.Sky);
 
-        const _planeCanvas = Viewer.createPlaneCanvas();
-        this.selector = Viewer.createSelector(_planeCanvas);
+        const _planeCanvas = BaseApp.createPlaneCanvas();
+        this.planeCtx = _planeCanvas.getContext('2d');
+        this.selector = BaseApp.createSelector(_planeCanvas);
         this.plane = this.selector.getObjectByName('plane');
 
-        this.selector.add(Viewer.createMarker('commandMarker'));
+        this.selector.add(BaseApp.createMarker('commandMarker'));
 
         const group = this.getInteractiveGroup();
         group.add(this.selector); // for ray not passing ghrough the selector surface
@@ -24,7 +26,7 @@ class Viewer extends Threelet {
         this.scene.add(Threelet.Utils.createTestDirectionalLight());
         this.scene.add(new THREE.GridHelper(10, 20));
 
-        this.sigData = Viewer.createSigObjects();
+        this.sigData = BaseApp.createSigObjects();
 
         const inputCallbacks = {
             onClick: (mx, my) => {
@@ -39,14 +41,14 @@ class Viewer extends Threelet {
 
                 const isec = this.mouseToPlaneIntersect(mx, my);
                 // console.log('@@ onClick(): isec:', isec);
-                if (isec && Viewer.isPointOnLeftSquare(isec.point)) {
+                if (isec && BaseApp.isPointOnLeftSquare(isec.point)) {
                     // console.log('@@ isec.faceIndex:', isec.faceIndex);
                     this.onLeftPlaneClicked(isec.faceIndex);
                 }
             },
             onDrag: (mx, my) => {
                 const isec = this.mouseToPlaneIntersect(mx, my);
-                if (isec && Viewer.isPointOnRightSquare(isec.point)) {
+                if (isec && BaseApp.isPointOnRightSquare(isec.point)) {
                     // console.log('@@ dragging:', isec.point);
                     this.invokeSigPadCall('_strokeUpdate', isec.point.x, isec.point.y);
                 }
@@ -54,7 +56,7 @@ class Viewer extends Threelet {
             onDragStart: (mx, my) => {
                 console.log('@@ onDragStart(): hi');
                 const isec = this.mouseToPlaneIntersect(mx, my);
-                if (isec && Viewer.isPointOnRightSquare(isec.point)) {
+                if (isec && BaseApp.isPointOnRightSquare(isec.point)) {
                     console.log('@@ drag start:', isec.point);
                     this.invokeSigPadCall('_strokeBegin', isec.point.x, isec.point.y);
                 }
@@ -116,71 +118,18 @@ class Viewer extends Threelet {
                 if (Math.floor(faceIndex/2) ===
                     Math.floor(lastFaceIndex/2)) {
                     console.log('@@ vr-click fulfilled for faceIndex:', faceIndex);
-                    if (isec && Viewer.isPointOnLeftSquare(isec.point)) {
+                    if (isec && BaseApp.isPointOnLeftSquare(isec.point)) {
                         this.onLeftPlaneClicked(isec.faceIndex);
                     }
                 }
             }
         });
 
-        this.planeCtx = _planeCanvas.getContext('2d');
-        this.update = (t, dt) => {
-            if (this.mlObject3D) {
-                // update model's topology
-                this.ml.update();
-
-                // update model's translation
-                for (let i of [0, 1]) {
-                    const pad = this.getControllersState().touchpads[i];
-
-                    if (pad) {
-                        this.displayControllerEvent(i, 'vr-touchpad-touch', pad.touched);
-                        this.updateControllerTouchpad(i, 'vr-touchpad-touch');
-                    }
-
-                    if (pad && pad.touched) {
-                        const f1 = pad.axes0 - pad.axes1;
-                        const f2 = pad.axes0 + pad.axes1;
-                        const pos = this.mlObject3D.position;
-                        if (f1 > 0 && f2 > 0 && pos.x < 4) {
-                            pos.x += 0.1;
-                        } else if (f1 > 0 && f2 < 0 && pos.y < 4) {
-                            pos.y += 0.1;
-                        } else if (f1 < 0 && f2 > 0 && pos.y > -4) {
-                            pos.y -= 0.1;
-                        } else if (f1 < 0 && f2 < 0 && pos.x > -4) {
-                            pos.x -= 0.1;
-                        } else { /* nop */ }
-                    }
-                }
-            }
-
-            // generate strokes from vrcontrollers when needed
-            for (let i of [0, 1]) {
-                if (this._vrPressPlaneStart[i] >= 0) {
-                    const isec = this.vrcontrollerToPlaneIntersect(i);
-                    if (isec && Viewer.isPointOnRightSquare(isec.point)) {
-                        this.invokeSigPadCall('_strokeUpdate', isec.point.x, isec.point.y);
-                    }
-                }
-            }
-
-            // transfer texture from sigPad to 3D canvas
-            if (this.sigData.needsUpdate) {
-                this.sigData.needsUpdate = false;
-                Viewer.clearPaintArea(this.planeCtx);
-                this.planeCtx.drawImage(this.sigData.canvas, 256, 0);
-                this.plane.material.map.needsUpdate = true;
-            }
-        };
-
-        if (params.instruction) {
-            Threelet.Utils.createCanvasFromImage('./control.png', can => {
-                // console.log('@@ can:', can);
-                // document.body.appendChild(can); // debug
-                this.illustrationCanvas = can;
-            });
-        }
+        Threelet.Utils.createCanvasFromImage('./control.png', can => {
+            // console.log('@@ can:', can);
+            // document.body.appendChild(can); // debug
+            this.illustrationCanvas = can;
+        });
 
         this.scene.add(this.getInteractiveGroup());
         this.ml = null;
@@ -188,13 +137,63 @@ class Viewer extends Threelet {
 
     } // end onCreate()
 
+    // override
+    onUpdate(t, dt) {
+        if (this.mlObject3D) {
+            // update model's topology
+            this.ml.update();
+
+            // update model's translation
+            for (let i of [0, 1]) {
+                const pad = this.getControllersState().touchpads[i];
+
+                if (pad) {
+                    this.displayControllerEvent(i, 'vr-touchpad-touch', pad.touched);
+                    this.updateControllerTouchpad(i, 'vr-touchpad-touch');
+                }
+
+                if (pad && pad.touched) {
+                    const f1 = pad.axes0 - pad.axes1;
+                    const f2 = pad.axes0 + pad.axes1;
+                    const pos = this.mlObject3D.position;
+                    if (f1 > 0 && f2 > 0 && pos.x < 4) {
+                        pos.x += 0.1;
+                    } else if (f1 > 0 && f2 < 0 && pos.y < 4) {
+                        pos.y += 0.1;
+                    } else if (f1 < 0 && f2 > 0 && pos.y > -4) {
+                        pos.y -= 0.1;
+                    } else if (f1 < 0 && f2 < 0 && pos.x > -4) {
+                        pos.x -= 0.1;
+                    } else { /* nop */ }
+                }
+            }
+        }
+
+        // generate strokes from vrcontrollers when needed
+        for (let i of [0, 1]) {
+            if (this._vrPressPlaneStart[i] >= 0) {
+                const isec = this.vrcontrollerToPlaneIntersect(i);
+                if (isec && BaseApp.isPointOnRightSquare(isec.point)) {
+                    this.invokeSigPadCall('_strokeUpdate', isec.point.x, isec.point.y);
+                }
+            }
+        }
+
+        // transfer texture from sigPad to 3D canvas
+        if (this.sigData.needsUpdate) {
+            this.sigData.needsUpdate = false;
+            BaseApp.clearPaintArea(this.planeCtx);
+            this.planeCtx.drawImage(this.sigData.canvas, 256, 0);
+            this.plane.material.map.needsUpdate = true;
+        }
+    }
+
     async loadML(name, model, debug=false) {
         this.ml = new ML(model);
         this.drawInfo([
             `model: ${name} - ${this.ml.getModelUrl()}`, ``, ``, ``, ``,
         ]);
 
-        // this.ml.init(obj => {
         const obj = await this.ml.init();
         const group = this.getInteractiveGroup();
 
@@ -225,7 +224,7 @@ class Viewer extends Threelet {
     invokeSigPadCall(method, px, py) {
         try {
             this.sigData.pad[method](
-                Viewer.createSigPadEvent(px, py, this.sigData.canvas));
+                BaseApp.createSigPadEvent(px, py, this.sigData.canvas));
         } catch (e) {
             // FIXME errors observed when using OrbitControls's panning
             console.warn('@@ woops: e:', e);
@@ -279,7 +278,7 @@ class Viewer extends Threelet {
         if (what.startsWith('command-')) {
             if (what.endsWith('clear')) {
                 this.sigData.pad.clear();
-                Viewer.clearPaintArea(this.planeCtx);
+                BaseApp.clearPaintArea(this.planeCtx);
                 this.updateIllustration(false);
 
                 if (this.mlObject3D) {
@@ -426,10 +425,10 @@ class Viewer extends Threelet {
         const planeCtx = planeCanvas.getContext('2d');
         planeCtx.fillStyle = '#222';
         planeCtx.fillRect(0, 0, 256, 256);
-        Viewer.clearPaintArea(planeCtx);
+        BaseApp.clearPaintArea(planeCtx);
 
-        Viewer.drawTitle(planeCtx);
-        Viewer.drawSelectionCommands(planeCtx);
+        BaseApp.drawTitle(planeCtx);
+        BaseApp.drawSelectionCommands(planeCtx);
         return planeCanvas;
     }
 
@@ -466,4 +465,4 @@ class Viewer extends Threelet {
     }
 
 }
-export default Viewer;
+export default BaseApp;

@@ -2,10 +2,10 @@
 <html>
 <head>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
-    <title>menu</title>
+    <title>acgan</title>
 </head>
 <body>
-    <canvas id="viewer" style="width: 100%; height: 100%;"></canvas>
+    <canvas id="app" style="width: 100%; height: 100%;"></canvas>
     <div>
         For use in non VR mode, try - [left-mouse-drag: canvas stroke] [right-mouse-drag: cam translate] [mouse-wheel: cam translate fw/bw]
     </div>
@@ -24,21 +24,21 @@
     <script src="../deps/tensorspace.min.js"></script>
 
     <script type="module">
-    import Viewer from '../../src/viewer.js';
+    import AcganApp from '../../src/acgan-app.js';
     import ML from '../../src/ml.js';
 
-    const viewer = new Viewer({
-        canvas: document.getElementById("viewer"),
+    const app = new AcganApp({
+        canvas: document.getElementById("app"),
         optAxes: false,
     });
 
     (async () => {
-        await viewer.loadML('lenet', ML.createLenet(), true);
-        await viewer.loadML('acgan', ML.createAcgan(), true);
+        await app.loadML('lenet', ML.createLenet(), true);
+        await app.loadML('acgan', ML.createAcgan(), true);
     })();
 
-    // viewer.updateLoop(30);
-    viewer.updateLoop(3); // debug
+    // app.updateLoop(30);
+    app.updateLoop(3); // debug
     </script>
 </body>
 </html>
