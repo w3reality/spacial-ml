@@ -207,7 +207,9 @@ class BaseApp extends Threelet {
         this.mlObject3D = obj;
         console.log('@@ group:', group.children);
 
-        Threelet.hasVrDisplay(tf => obj.position.set(0, 1, tf ? -1.5 : 1));
+        if (Threelet.isVrSupported()) {
+            obj.position.set(0, 1, tf ? -1.5 : 1);
+        }
 
         if (debug) {
             obj.visible = true;
@@ -355,7 +357,9 @@ class BaseApp extends Threelet {
     }
     static createSelector(planeCanvas) {
         const selector = new THREE.Group();
-        Threelet.hasVrDisplay(tf => selector.position.set(0, 1, tf ? -3.5 : -0.5));
+        if (Threelet.isVrSupported()) {
+            selector.position.set(0, 1, tf ? -3.5 : -0.5);
+        }
 
         const plane = Threelet.Utils.createCanvasPlane(planeCanvas, 4, 2, 8, 8);
         if (0) { // control tex opacity
