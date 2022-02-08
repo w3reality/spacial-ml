@@ -1,6 +1,6 @@
 {
     "name": "spacial-ml",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Machine learning as a spacial computing app",
     "main": "src/viewer.js",
     "directories": {
@@ -23,10 +23,5 @@
     },
     "homepage": "https://github.com/w3reality/spacial-ml",
     "dependencies": {},
-    "devDependencies": {
-        "babel-preset-env": "^1.7.0",
-        "tensorspace": "^0.6.1",
-        "three": "^0.112.0",
-        "threelet": "^0.10.0"
-    }
+    "devDependencies": {}
 }
